@@ -1,9 +1,9 @@
-const puppeteer = require("puppeteer");
 const cheerio = require("cheerio");
-const fs = require("fs");
 const chromium = require("chrome-aws-lambda");
+const storage = require("node-persist");
 
 module.exports = async (req, res) => {
+  await storage.init();
   const browser = await chromium.puppeteer.launch({
     args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
     defaultViewport: chromium.defaultViewport,
@@ -21,16 +21,15 @@ module.exports = async (req, res) => {
   await $("option").each((i, op) => {
     options.push($(op).text());
   });
-  const data = await fs.readFileSync("data", "utf8").split("\n");
+  const company = (await storage.getItem("company")) || [];
   const newOptions = [];
   await Promise.all(
     options.map(async (x) => {
-      if (!data.includes(x)) {
-        await fs.writeFileSync("data", `${x}\n`);
+      if (!company.includes(x)) {
         newOptions.push(x);
       }
     })
   );
-
+  await storage.setItem("company", [...company, ...newOptions]);
   res.status(200).send({ options: newOptions });
 };
