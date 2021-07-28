@@ -1,9 +1,16 @@
 const puppeteer = require("puppeteer");
 const cheerio = require("cheerio");
 const fs = require("fs");
+const chromium = require("chrome-aws-lambda");
 
 module.exports = async (req, res) => {
-  const browser = await puppeteer.launch();
+  const browser = await chromium.puppeteer.launch({
+    args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath,
+    headless: true,
+    ignoreHTTPSErrors: true,
+  });
   const page = await browser.newPage();
   await page.goto("https://iporesult.cdsc.com.np/");
   const html = await page.evaluate(() => {
