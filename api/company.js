@@ -21,15 +21,15 @@ module.exports = async (req, res) => {
   await $("option").each((i, op) => {
     options.push($(op).text());
   });
-  const company = (await storage.getItem("company")) || [];
+  const companies = (await storage.getItem("companies")) || [];
   const newOptions = [];
   await Promise.all(
     options.map(async (x) => {
-      if (!company.includes(x)) {
+      if (!companies.includes(x)) {
         newOptions.push(x);
       }
     })
   );
-  await storage.setItem("company", [...company, ...newOptions]);
+  await storage.setItem("companies", [...companies, ...newOptions]);
   res.status(200).send({ options: newOptions });
 };
