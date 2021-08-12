@@ -17,7 +17,11 @@ module.exports = async (req, res) => {
   const $ = cheerio.load(html);
   const options = [];
   await $("option").each((i, op) => {
-    options.push($(op).text());
+    const data = {
+      id: $(op).val(),
+      name: $(op).text(),
+    };
+    options.push(data);
   });
   res.status(200).send({ options });
 };
